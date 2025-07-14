@@ -1,0 +1,140 @@
+openapi: 3.0.3
+info:
+  title: Posts API
+  description: API for managing posts
+  version: 1.0.0
+servers:
+  - url: https://my-api-endpoint.amazonaws.com/maybe-prod
+paths:
+  /posts:
+    get:
+      summary: Get all posts
+      responses:
+        '200':
+          description: A list of posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Post'
+    post:
+      summary: Create a new post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostCreate'
+      responses:
+        '201':
+          description: Post created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+  /post/{id}:
+    get:
+      summary: Get a post by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Post found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '404':
+          description: Post not found
+    patch:
+      summary: Update a post by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostUpdate'
+      responses:
+        '200':
+          description: Post updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '404':
+          description: Post not found
+    delete:
+      summary: Delete a post by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Post deleted successfully
+        '404':
+          description: Post not found
+
+components:
+  schemas:
+    # use __ (2 underscores) to mark this scheme as 'private' to avoid references to it from the request description
+    __PostBase:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 200
+          example: "My first post"
+        body:
+          type: string
+          maxLength: 2000
+          example: "This is the content of the post."
+        tags:
+          type: array
+          items:
+            type: string
+          example: ["aws", "python"]
+    PostCreate:
+      allOf:
+        - $ref: '#/components/schemas/__PostBase'
+      required:
+        - title
+        - body
+        - tags
+      additionalProperties: false # disallow unexpected fields
+    PostUpdate:
+      allOf:
+        - $ref: '#/components/schemas/__PostBase'
+      additionalProperties: false # disallow unexpected fields
+    Post:
+      allOf:
+        - $ref: '#/components/schemas/__PostBase'
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        createdDate:
+          type: string
+          format: date-time
+          example: "2025-07-14T10:00:00Z"
+        updatedDate:
+          type: string
+          format: date-time
+          example: "2025-07-14T10:30:00Z"
