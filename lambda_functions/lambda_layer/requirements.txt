@@ -1,0 +1,3 @@
+# AI Gods says that AWS Lambda Python runtimes already include boto3 by default (which is good),
+# but including it explicitly helps ensure consistent versions or local testing.
+boto3==1.39.4
