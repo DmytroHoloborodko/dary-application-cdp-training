@@ -4,7 +4,7 @@ info:
   description: API for managing posts
   version: 1.0.0
 servers:
-  - url: https://my-api-endpoint.amazonaws.com/maybe-prod
+  - url: https://i0p9dslu71.execute-api.us-east-1.amazonaws.com/dev
 paths:
   /posts:
     get:
