@@ -76,8 +76,8 @@ jobs:
           FUNCTIONS=("dary-application-lambda-get-handler" "dary-application-lambda-delete-handler" "dary-application-lambda-patch-handler" "dary-application-lambda-post-handler")
           for FUNCTION_NAME in "${FUNCTIONS[@]}"; do
             echo "Packaging $FUNCTION_NAME..."
-            cd "${GITHUB_WORKSPACE}/lambda_functions/${FUNCTION_NAME}"
             pwd
+            cd "${GITHUB_WORKSPACE}/lambda_functions/${FUNCTION_NAME}"
             
             zip -r ${FUNCTION_NAME}.zip .
           
