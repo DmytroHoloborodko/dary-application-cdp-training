@@ -73,14 +73,15 @@ jobs:
 
       - name: Update Lambda function code
         run: |
-          pwd
-          ls -la
           FUNCTIONS=("dary-application-lambda-get-handler" "dary-application-lambda-delete-handler" "dary-application-lambda-patch-handler" "dary-application-lambda-post-handler")
           for FUNCTION_NAME in "${FUNCTIONS[@]}"; do
             echo "Packaging $FUNCTION_NAME..."
-            cd lambda_functions/$FUNCTION_NAME
-            zip -r ../../${FUNCTION_NAME}.zip .
-            cd ../..
+            cd "${GITHUB_WORKSPACE}/lambda_functions/${FUNCTION_NAME}"
+            pwd
+            
+            zip -r ${FUNCTION_NAME}.zip .
+          
+            ls -la
 
             echo "Updating code for $FUNCTION_NAME..."
             aws lambda update-function-code \
