@@ -5,7 +5,7 @@ import boto3
 import pytest
 from moto import mock_aws
 
-from lambda_functions import get_posts as get_handler
+from lambda_functions import get_post as get_handler
 
 
 @pytest.fixture
