@@ -7,17 +7,17 @@ table = get_table()
 
 
 def lambda_handler(event, context):
-    path_params = event.get("pathParameters")
-
     try:
+        path_params = event.get("pathParameters")
         result = get_post_by_id(path_params["id"]) if path_params and "id" in path_params else get_all_posts()
-        return result.model_dump()
 
     except Exception as e:
-        return Response(
+        result = Response(
             statusCode=500,
             body=str(e)
-        ).model_dump()
+        )
+
+    return result.model_dump()
 
 
 def get_post_by_id(post_id) -> Response:
@@ -41,7 +41,7 @@ def get_all_posts() -> Response:
 if __name__ == "__main__":
     event = {
         "pathParameters": {
-            "id": "9957ffe0-afee-4e73-99b3-504c7f864d53"
+            "id": "9f2320af-e78a-4cc5-b098-f0333c1efbfc"
         }
     }
     print(lambda_handler(event, None))

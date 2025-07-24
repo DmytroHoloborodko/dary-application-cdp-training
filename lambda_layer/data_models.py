@@ -19,7 +19,7 @@ class Post(PostBase):
 
 class Response(BaseModel):
     statusCode: int
-    body: str
+    body: str = ""
     headers: dict = {
         "Content-Type": "application/json"
     }

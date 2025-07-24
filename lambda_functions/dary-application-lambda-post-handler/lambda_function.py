@@ -14,16 +14,18 @@ def lambda_handler(event, context):
 
         table.put_item(Item=post.model_dump(mode="json"))
 
-        return Response(
+        result = Response(
             statusCode=201,
             body=json.dumps(post.model_dump(mode="json"))
-        ).model_dump()
+        )
 
     except Exception as e:
-        return Response(
+        result = Response(
             statusCode=500,
             body=str(e)
-        ).model_dump()
+        )
+
+    return result.model_dump()
 
 
 if __name__ == "__main__":
