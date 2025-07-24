@@ -42,9 +42,31 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Publish new Lambda Layer version
+        id: publish_layer
         run: |
-          aws lambda publish-layer-version \
+          LAYER_VERSION=$(aws lambda publish-layer-version \
             --layer-name $LAYER_NAME \
             --zip-file fileb://layer.zip \
-            --compatible-runtimes python${{ env.PYTHON_VERSION }} \
-            --region ${{ secrets.AWS_REGION }}
+            --compatible-runtimes python${PYTHON_VERSION} \
+            --region ${{ secrets.AWS_REGION }} \
+            --query 'Version' --output text)
+          echo "LAYER_VERSION=$LAYER_VERSION" >> $GITHUB_ENV
+
+      - name: Update all Lambdas using this layer
+        run: |
+          FUNCTIONS=$(aws lambda list-functions --query 'Functions[].FunctionName' --output text)
+
+          for FUNCTION_NAME in $FUNCTIONS; do
+            LAYERS=$(aws lambda get-function-configuration --function-name $FUNCTION_NAME --query 'Layers[].Arn' --output text)
+
+            if echo "$LAYERS" | grep -q "$LAYER_NAME"; then
+              echo "Updating $FUNCTION_NAME to use new layer version $LAYER_VERSION"
+
+              # Remove old layer ARN, replace with new version
+              NEW_LAYERS=$(echo "$LAYERS" | sed "s|\(.*\):[0-9]*|\1:$LAYER_VERSION|g")
+
+              aws lambda update-function-configuration \
+                --function-name "$FUNCTION_NAME" \
+                --layers $NEW_LAYERS
+            fi
+          done
