@@ -1,0 +1,3 @@
+pytest
+moto[dynamodb2]>=5.0.0
+boto3
