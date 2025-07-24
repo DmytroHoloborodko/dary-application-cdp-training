@@ -1,48 +1,42 @@
 import json
+
+from data_models import Response
 from dynamodb_client import get_table
 
-def lambda_handler(event, context):
-    table = get_table()
+table = get_table()
 
+
+def lambda_handler(event, context):
     path_params = event.get("pathParameters")
 
     try:
-
-        if path_params and "id" in path_params:
-            # Handle GET /post/{id}
-            post_id = path_params["id"]
-
-            response = table.get_item(Key={"id": post_id})
-            item = response.get("Item")
-            print(item)
-            return {
-                "statusCode": 200,
-                "body": json.dumps(item),
-                "headers": {
-                    "Content-Type": "application/json"
-                }
-            }
-
-        response = table.scan()
-        print(response)
-        items = response.get('Items', [])
-
-        return {
-            "statusCode": 200,
-            "body": json.dumps(items),
-            "headers": {
-                "Content-Type": "application/json"
-            }
-        }
+        result = get_post_by_id(path_params["id"]) if path_params and "id" in path_params else get_all_posts()
+        return result.model_dump()
 
     except Exception as e:
-        return {
-            "statusCode": 500,
-            "body": json.dumps({"error": str(e)}),
-            "headers": {
-                "Content-Type": "application/json"
-            }
-        }
+        return Response(
+            statusCode=500,
+            body=str(e)
+        ).model_dump()
+
+
+def get_post_by_id(post_id) -> Response:
+    response = table.get_item(Key={"id": post_id})
+    item = response.get("Item")
+    return Response(
+        statusCode=200,
+        body=json.dumps(item)
+    )
+
+
+def get_all_posts() -> Response:
+    response = table.scan()
+    items = response.get('Items', [])
+    return Response(
+        statusCode=200,
+        body=json.dumps(items)
+    )
+
 
 if __name__ == "__main__":
     event = {
@@ -50,4 +44,4 @@ if __name__ == "__main__":
             "id": "9957ffe0-afee-4e73-99b3-504c7f864d53"
         }
     }
-    lambda_handler(event, None)
+    print(lambda_handler(event, None))
