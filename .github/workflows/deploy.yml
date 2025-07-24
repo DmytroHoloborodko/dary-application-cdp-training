@@ -55,6 +55,7 @@ jobs:
       - name: Update all Lambdas using this layer
         run: |
           FUNCTIONS=$(aws lambda list-functions --query 'Functions[].FunctionName' --output text)
+          echo "FUNCTIONS=$FUNCTIONS" >> $GITHUB_ENV
 
           for FUNCTION_NAME in $FUNCTIONS; do
             LAYERS=$(aws lambda get-function-configuration --function-name $FUNCTION_NAME --query 'Layers[].Arn' --output text)
@@ -73,19 +74,17 @@ jobs:
 
       - name: Update Lambda function code
         run: |
-          FUNCTIONS=("dary-application-lambda-get-handler" "dary-application-lambda-delete-handler" "dary-application-lambda-patch-handler" "dary-application-lambda-post-handler")
-          for FUNCTION_NAME in "${FUNCTIONS[@]}"; do
+          cd lambda_functions
+          for FUNCTION_NAME in $FUNCTIONS; do
             echo "Packaging $FUNCTION_NAME..."
-            pwd
-            cd "${GITHUB_WORKSPACE}/lambda_functions/${FUNCTION_NAME}"
-            
+            cd ${FUNCTION_NAME}
             zip -r ${FUNCTION_NAME}.zip .
-          
-            ls -la
 
             echo "Updating code for $FUNCTION_NAME..."
             aws lambda update-function-code \
               --function-name $FUNCTION_NAME \
               --zip-file fileb://${FUNCTION_NAME}.zip \
               --region ${{ secrets.AWS_REGION }}
+
+            cd ..
           done
