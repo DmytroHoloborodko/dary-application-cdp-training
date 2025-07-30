@@ -2,6 +2,7 @@ import json
 
 from data_models import Response
 from dynamodb_client import get_table
+from typing import TypedDict
 
 table = get_table()
 
@@ -20,13 +21,12 @@ def lambda_handler(event, context):
     return result.model_dump()
 
 
-def get_post_by_id(post_id) -> Response:
+def get_post_by_id(post_id: str) -> Response:
     response = table.get_item(Key={"id": post_id})
-    item = response.get("Item")
-    return Response(
-        statusCode=200,
-        body=json.dumps(item)
-    )
+    # item = response.get("Item")
+    if item := response.get("Item"):
+        return Response(statusCode=200, body=json.dumps(item))
+    return Response(statusCode=404, body=json.dumps({"error": "Post not found"}))
 
 
 def get_all_posts() -> Response:
@@ -41,7 +41,7 @@ def get_all_posts() -> Response:
 if __name__ == "__main__":
     event = {
         "pathParameters": {
-            "id": "9f2320af-e78a-4cc5-b098-f0333c1efbfc"
+            "id": "9f2320af-e78a-4cc5-b098-f0333c1ebfc"
         }
     }
     print(lambda_handler(event, None))
